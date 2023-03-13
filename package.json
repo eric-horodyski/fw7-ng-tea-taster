@@ -12,6 +12,8 @@
     "prepare": "husky install",
     "start": "ng serve",
     "test": "ng test",
+    "test:ci": "ng test --no-watch",
+    "test:debug": "ng test --browsers=Chrome",
     "watch": "ng build --watch --configuration development"
   },
   "private": true,
