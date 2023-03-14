@@ -1,0 +1,37 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Login</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="loginForm">
+    <ion-input
+      label="E-Mail Address"
+      label-placement="floating"
+      id="email-input"
+      name="email"
+      type="email"
+      [errorText]="emailError"
+      formControlName="email"
+    ></ion-input>
+    <ion-input
+      label="Password"
+      label-placement="floating"
+      id="password-input"
+      name="password"
+      type="password"
+      [errorText]="passwordError"
+      formControlName="password"
+    ></ion-input>
+  </form>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-button id="signin-button" expand="full" [disabled]="!loginForm.valid" (click)="signIn()">
+      Sign In
+      <ion-icon slot="end" name="log-in-outline"></ion-icon>
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>
