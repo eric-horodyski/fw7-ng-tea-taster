@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
+import { AuthenticationService, SessionVaultService } from '@app/core';
+import { NavController } from '@ionic/angular';
+import { take, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-login',
@@ -7,6 +10,8 @@ import { FormBuilder, Validators } from '@angular/forms';
   styleUrls: ['./login.page.scss'],
 })
 export class LoginPage {
+  loginFailed = false;
+
   loginForm = this.fb.group({
     email: ['', [Validators.email, Validators.required]],
     password: ['', [Validators.required]],
@@ -22,9 +27,28 @@ export class LoginPage {
     return password.errors?.['required'] ? 'Required' : 'Unknown error';
   }
 
-  constructor(private fb: FormBuilder) {}
+  constructor(
+    private auth: AuthenticationService,
+    private fb: FormBuilder,
+    private nav: NavController,
+    private sessionVault: SessionVaultService
+  ) {}
 
   signIn() {
-    console.log(this.loginForm.controls.email.value, this.loginForm.controls.password.value);
+    const { email, password } = this.loginForm.controls;
+    this.auth
+      .login(email.value!, password.value!)
+      .pipe(
+        take(1),
+        tap(async (session) => {
+          if (session) {
+            await this.sessionVault.set(session);
+            this.nav.navigateRoot(['/']);
+          } else {
+            this.loginFailed = true;
+          }
+        })
+      )
+      .subscribe();
   }
 }

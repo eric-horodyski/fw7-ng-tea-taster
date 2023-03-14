@@ -35,3 +35,11 @@
     </ion-button>
   </ion-toolbar>
 </ion-footer>
+
+<ion-toast
+  [isOpen]="loginFailed"
+  message="Invalid Email or Password!"
+  color="danger"
+  [duration]="3000"
+  (didDismiss)="loginFailed = false"
+></ion-toast>
