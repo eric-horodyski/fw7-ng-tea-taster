@@ -16,6 +16,12 @@ export class TeaService {
       .pipe(map((teas) => teas.map((t) => this.convert(t))));
   }
 
+  get(id: number): Observable<Tea> {
+    return this.http
+      .get<Omit<Tea, 'image'>>(`${environment.dataService}/tea-categories/${id}`)
+      .pipe(map((tea) => this.convert(tea)));
+  }
+
   private convert(tea: Omit<Tea, 'image'>): Tea {
     return { ...tea, image: `assets/img/${this.images[tea.id - 1]}.jpg` };
   }

@@ -38,6 +38,10 @@ export class TeaPage implements OnInit {
       .subscribe();
   }
 
+  showDetailsPage(id: number) {
+    this.nav.navigateForward(['tea-details', id]);
+  }
+
   private toMatrix(tea: Tea[]): Tea[][] {
     const matrix: Tea[][] = [];
 
