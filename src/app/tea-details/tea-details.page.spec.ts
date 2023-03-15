@@ -1,8 +1,11 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { FormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { TeaService } from '@app/core/tea/tea.service';
 import { createTeaServiceMock } from '@app/core/testing';
+import { Tea } from '@app/models';
+import { SharedModule } from '@app/shared';
 import { IonicModule } from '@ionic/angular';
 import { createActivatedRouteMock } from '@test/mocks';
 import { of } from 'rxjs';
@@ -16,7 +19,7 @@ describe('TeaDetailsPage', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [TeaDetailsPage],
-      imports: [IonicModule],
+      imports: [FormsModule, IonicModule, SharedModule],
       providers: [
         { provide: ActivatedRoute, useFactory: createActivatedRouteMock },
         { provide: TeaService, useFactory: createTeaServiceMock },
@@ -36,12 +39,13 @@ describe('TeaDetailsPage', () => {
       const route = TestBed.inject(ActivatedRoute);
       (route.snapshot.paramMap.get as any).withArgs('id').and.returnValue('7');
       const tea = TestBed.inject(TeaService);
-      (tea.get as jasmine.Spy).and.returnValue(
+      (tea.get as jasmine.Spy).withArgs(7).and.returnValue(
         of({
           id: 7,
           name: 'White',
           description: 'Often looks like frosty silver pine needles',
           image: 'imgs/white.png',
+          rating: 4,
         })
       );
     });
@@ -56,6 +60,32 @@ describe('TeaDetailsPage', () => {
       fixture.detectChanges();
       const el = fixture.debugElement.query(By.css('[data-testid="description"]'));
       expect(el.nativeElement.textContent.trim()).toBe('Often looks like frosty silver pine needles');
+    });
+
+    it('initializes the rating', () => {
+      fixture.detectChanges();
+      expect(component.rating).toBe(4);
+    });
+  });
+
+  describe('rating click', () => {
+    const tea: Tea = {
+      id: 7,
+      name: 'White',
+      description: 'Often looks like frosty silver pine needles',
+      image: 'imgs/white.png',
+      rating: 4,
+    };
+    beforeEach(() => {
+      fixture.detectChanges();
+    });
+
+    it('saves a rating change', () => {
+      const teaService = TestBed.inject(TeaService);
+      component.rating = 3;
+      component.changeRating(tea);
+      expect(teaService.save).toHaveBeenCalledTimes(1);
+      expect(teaService.save).toHaveBeenCalledWith({ ...tea, rating: 3 });
     });
   });
 });

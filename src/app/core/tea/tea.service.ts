@@ -1,8 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Tea } from '@app/models';
+import { Preferences } from '@capacitor/preferences';
 import { environment } from '@env/environment';
-import { EMPTY, map, Observable } from 'rxjs';
+import { mergeMap, Observable } from 'rxjs';
+
+type TeaResponse = Omit<Tea, 'image' | 'rating'>;
 
 @Injectable({ providedIn: 'root' })
 export class TeaService {
@@ -12,17 +15,29 @@ export class TeaService {
 
   getAll(): Observable<Tea[]> {
     return this.http
-      .get<Array<Omit<Tea, 'image'>>>(`${environment.dataService}/tea-categories`)
-      .pipe(map((teas) => teas.map((t) => this.convert(t))));
+      .get<Array<TeaResponse>>(`${environment.dataService}/tea-categories`)
+      .pipe(mergeMap((teas) => Promise.all(teas.map((t) => this.convert(t)))));
   }
 
   get(id: number): Observable<Tea> {
     return this.http
-      .get<Omit<Tea, 'image'>>(`${environment.dataService}/tea-categories/${id}`)
-      .pipe(map((tea) => this.convert(tea)));
+      .get<TeaResponse>(`${environment.dataService}/tea-categories/${id}`)
+      .pipe(mergeMap((tea) => this.convert(tea)));
   }
 
-  private convert(tea: Omit<Tea, 'image'>): Tea {
-    return { ...tea, image: `assets/img/${this.images[tea.id - 1]}.jpg` };
+  save(tea: Tea): Promise<void> {
+    return Preferences.set({
+      key: `rating${tea.id}`,
+      value: tea.rating.toString(),
+    });
+  }
+
+  private async convert(tea: TeaResponse): Promise<Tea> {
+    const { value } = await Preferences.get({ key: `rating${tea.id}` });
+    return {
+      ...tea,
+      image: `assets/img/${this.images[tea.id - 1]}.jpg`,
+      rating: parseInt(value || '0', 10),
+    };
   }
 }
