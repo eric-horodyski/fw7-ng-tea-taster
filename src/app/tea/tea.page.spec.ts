@@ -6,9 +6,14 @@ import { DebugElement } from '@angular/core';
 
 import { TeaPage } from './tea.page';
 import { AuthenticationService, SessionVaultService } from '@app/core';
-import { createAuthenticationServiceMock, createSessionVaultServiceMock } from '@app/core/testing';
+import {
+  createAuthenticationServiceMock,
+  createSessionVaultServiceMock,
+  createTeaServiceMock,
+} from '@app/core/testing';
 import { createNavControllerMock } from '@test/mocks';
 import { of } from 'rxjs';
+import { TeaService } from '@app/core/tea/tea.service';
 
 describe('TeaPage', () => {
   let component: TeaPage;
@@ -91,9 +96,12 @@ describe('TeaPage', () => {
         { provide: AuthenticationService, useFactory: createAuthenticationServiceMock },
         { provide: SessionVaultService, useFactory: createSessionVaultServiceMock },
         { provide: NavController, useFactory: createNavControllerMock },
+        { provide: TeaService, useFactory: createTeaServiceMock },
       ],
     }).compileComponents();
 
+    const tea = TestBed.inject(TeaService);
+    (tea.getAll as jasmine.Spy).and.returnValue(of(teas));
     fixture = TestBed.createComponent(TeaPage);
     component = fixture.componentInstance;
     fixture.detectChanges();
