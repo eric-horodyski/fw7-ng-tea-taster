@@ -25,19 +25,6 @@ export class TeaPage implements OnInit {
     this.teaMatrix$ = this.tea.getAll().pipe(map((teas) => this.toMatrix(teas)));
   }
 
-  logout() {
-    return this.auth
-      .logout()
-      .pipe(
-        take(1),
-        tap(async () => {
-          await this.sessionVault.clear();
-          this.nav.navigateRoot(['/', 'login']);
-        })
-      )
-      .subscribe();
-  }
-
   showDetailsPage(id: number) {
     this.nav.navigateForward(['tabs', 'tea', 'tea-details', id]);
   }
