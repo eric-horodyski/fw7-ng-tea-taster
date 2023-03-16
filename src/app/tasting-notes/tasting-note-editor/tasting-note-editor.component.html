@@ -5,6 +5,9 @@
       <ion-button id="cancel-button" (click)="close()" data-testid="cancel-button"> Cancel </ion-button>
     </ion-buttons>
     <ion-buttons slot="end">
+      <ion-button *ngIf="sharingIsAvailable" [disabled]="!allowSharing" data-testid="share-button" (click)="share()">
+        <ion-icon slot="icon-only" name="share-outline"></ion-icon>
+      </ion-button>
       <ion-button expand="full" [disabled]="!editorForm.valid" (click)="save()" data-testid="save-button">{{
         buttonLabel
       }}</ion-button>

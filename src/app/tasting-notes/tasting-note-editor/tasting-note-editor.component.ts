@@ -2,7 +2,8 @@ import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import { TastingNotesService, TeaService } from '@app/core';
 import { TastingNote, Tea } from '@app/models';
-import { ModalController } from '@ionic/angular';
+import { Share } from '@capacitor/share';
+import { ModalController, Platform } from '@ionic/angular';
 import { Observable, of, tap } from 'rxjs';
 
 @Component({
@@ -11,8 +12,7 @@ import { Observable, of, tap } from 'rxjs';
   styleUrls: ['./tasting-note-editor.component.scss'],
 })
 export class TastingNoteEditorComponent implements OnInit {
-  @Input()
-  note: TastingNote | undefined;
+  @Input() note: TastingNote | undefined;
 
   editorForm = this.fb.group({
     brand: ['', Validators.required],
@@ -25,9 +25,22 @@ export class TastingNoteEditorComponent implements OnInit {
   title: string = '';
   teaCategories$: Observable<Array<Tea>> = of([]);
 
+  get sharingIsAvailable(): boolean {
+    return this.platform.is('hybrid');
+  }
+
+  get allowSharing(): boolean {
+    return !!(
+      this.editorForm.controls.brand.value &&
+      this.editorForm.controls.name.value &&
+      this.editorForm.controls.rating.value
+    );
+  }
+
   constructor(
     private fb: FormBuilder,
     private modalController: ModalController,
+    private platform: Platform,
     private tastingNotes: TastingNotesService,
     private tea: TeaService
   ) {}
@@ -67,5 +80,14 @@ export class TastingNoteEditorComponent implements OnInit {
       this.buttonLabel = 'Add';
       this.title = 'Add Note';
     }
+  }
+
+  async share(): Promise<void> {
+    await Share.share({
+      title: `${this.editorForm.controls.brand.value}: ${this.editorForm.controls.name.value}`,
+      text: `I gave ${this.editorForm.controls.brand.value}: ${this.editorForm.controls.name.value} ${this.editorForm.controls.rating.value} stars on the Tea Taster app`,
+      dialogTitle: 'Share your tasting note',
+      url: 'https://tea-taster-training.web.app',
+    });
   }
 }
